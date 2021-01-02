@@ -6,19 +6,19 @@ import chunk from 'lodash/chunk'
 const numRows = 4;
 const numCols = 4;
 
-function Square(props) {
+function Card(props) {
   return (
-    <div className="square">
+    <div className="card">
       {props.value}
     </div>
   );
 }
 
-class Board extends React.Component {
-  renderSquare(i) {
+class Card extends React.Component {
+  renderCard(i) {
     return (
       <Square
-        value={this.props.squares[i]}
+        value={this.props.cards[i] !== 0 ? this.props.cards[i] : null}
       />
     );
   }
@@ -31,7 +31,7 @@ class Board extends React.Component {
             chunk(new Array(numRows * numCols).fill(0), numCols).map((item, rowIndex) => {
               return (
                 <div key={rowIndex} className="row">
-                  {item.map((col, colIndex) => this.renderSquare(numRows * rowIndex + colIndex))}
+                  {item.map((col, colIndex) => this.renderCard(numRows * rowIndex + colIndex))}
                 </div>
               )
             })
@@ -50,7 +50,7 @@ class Table extends React.Component {
           <div>{"Player One"}</div>
           <div className="board">
             <Board
-              squares={this.props.squares}
+              cards={this.props.playerOneCards}
             />
           </div>
           <div>{"Total: "}</div>
@@ -59,7 +59,7 @@ class Table extends React.Component {
           <div>{"Player Two"}</div>
           <div className="board">
             <Board
-              squares={this.props.squares}
+              cards={this.props.playerTwoCards}
             />
           </div>
           <div>{"Total: "}</div>
@@ -73,18 +73,16 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      playerOneBoard: Array(numRows * numCols).fill(null),
-      playerTwoBoard: Array(numRows * numCols).fill(null),
-      playerOneScore: 0,
-      playerTwoScore: 0,
-      playerOneStanding: false,
-      playerTwoStanding: false,
+      playerOneCards: Array(numRows * numCols).fill(0),
+      playerTwoCards: Array(numRows * numCols).fill(0),
+      isPlayerOneStanding: false,
+      isPlayerTwoStanding: false,
       oneIsNext: true
     };
   }
 
   handleForfeit(player) {
-    if (calculateWinner(this.props.playerOneScore, this.props.playerOneStanding, this.props.playerTwoScore, this.props.playerTwoStanding)) {
+    if (calculateWinner(this.props.playerOneCards.reduce((a, b) => a + b, 0), this.props.isPlayerOneStanding, this.props.playerTwoCards.reduce((a, b) => a + b, 0), this.props.isPlayerTwoStanding)) {
       return;
     }
 
@@ -96,19 +94,23 @@ class Game extends React.Component {
   }
 
   handleEndTurn(player) {
-    if (calculateWinner(this.props.playerOneScore, this.props.playerOneStanding, this.props.playerTwoScore, this.props.playerTwoStanding)) {
+    if (calculateWinner(this.props.playerOneCards.reduce((a, b) => a + b, 0), this.props.isPlayerOneStanding, this.props.playerTwoCards.reduce((a, b) => a + b, 0), this.props.isPlayerTwoStanding)) {
       return;
     }
 
     if (player === 1) {
-      this.setState();
+      this.setState({
+        playerOneCards: this.props.playerOneCards,
+        playerTwoCards: this.props.playerTwoCards,
+        oneIsNext: true,
+      });
     } else {
       this.setState();
     }
   }
 
   handleStand(player) {
-    if (calculateWinner(this.props.playerOneScore, this.props.playerOneStanding, this.props.playerTwoScore, this.props.playerTwoStanding)) {
+    if (calculateWinner(this.props.playerOneCards.reduce((a, b) => a + b, 0), this.props.isPlayerOneStanding, this.props.playerTwoScore.reduce((a, b) => a + b, 0), this.props.isPlayerTwoStanding)) {
       return;
     }
 
@@ -142,8 +144,8 @@ class Game extends React.Component {
       <div className="game">
         <div>
           <Table
-            playerOneBoard={this.props.playerOneBoard}
-            playerTwoBoard={this.props.playerTwoBoard}
+            playerOneCards={this.props.playerOneCards}
+            playerTwoCards={this.props.playerTwoCards}
           />
         </div>
         <div className="game-info">

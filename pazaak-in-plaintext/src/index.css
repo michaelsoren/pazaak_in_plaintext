@@ -26,7 +26,7 @@ ol, ul {
   margin-bottom: 10px;
 }
 
-.square {
+.card {
   background: #fff;
   border: 1px solid #999;
   float: left;
@@ -41,11 +41,11 @@ ol, ul {
   width: 34px;
 }
 
-.square:focus {
+.card:focus {
   outline: none;
 }
 
-.kbd-navigation .square:focus {
+.kbd-navigation .card:focus {
   background: #ddd;
 }
 
