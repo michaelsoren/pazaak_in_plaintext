@@ -1,0 +1,7 @@
+Pazaak is a game where you are handed random cards and you try to get as close as possible to 20 without going over.
+
+0.1: Both users make choices, no additional cards. Can just choose to stand or accept. No side decks
+0.2: Both users make choices, have side decks (random).
+0.3: Can select your side deck before the game begins, then enter the game
+0.4: Can play against a bot
+0.5: Can play against a regular bot (doesn't know the future cards) and one that does
