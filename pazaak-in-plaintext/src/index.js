@@ -8,9 +8,9 @@ const numCols = 4;
 
 function Square(props) {
   return (
-    <button className="square" onClick={props.onClick}>
+    <div className="square">
       {props.value}
-    </button>
+    </div>
   );
 }
 
@@ -82,7 +82,7 @@ class Game extends React.Component {
         }
       ],
       stepNumber: 0,
-      xIsNext: true
+      oneIsNext: true
     };
   }
 
@@ -93,7 +93,7 @@ class Game extends React.Component {
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
-    squares[i] = this.state.xIsNext ? "X" : "O";
+    squares[i] = this.state.oneIsNext ? "One" : "Two";
     this.setState({
       history: history.concat([
         {
@@ -101,14 +101,14 @@ class Game extends React.Component {
         }
       ]),
       stepNumber: history.length,
-      xIsNext: !this.state.xIsNext
+      oneIsNext: !this.state.oneIsNext
     });
   }
 
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      xIsNext: (step % 2) === 0
+      oneIsNext: (step % 2) === 0
     });
   }
 
@@ -117,22 +117,11 @@ class Game extends React.Component {
     const current = history[this.state.stepNumber];
     const winner = calculateWinner(current.squares);
 
-    const moves = history.map((step, move) => {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
-
     let status;
     if (winner) {
       status = "Winner: " + winner;
     } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
+      status = "Current player: " + (this.state.oneIsNext ? "One" : "Two");
     }
 
     return (
@@ -145,7 +134,11 @@ class Game extends React.Component {
         </div>
         <div className="game-info">
           <div>{status}</div>
-          <ol>{moves}</ol>
+          <div className="game-buttons">
+              <button className="game-button" onClick={() => this.jumpTo(0)}>{"End Turn"}</button>
+              <button className="game-button" onClick={() => this.jumpTo(0)}>{"Stand"}</button>
+              <button className="game-button" onClick={() => this.jumpTo(0)}>{"Forfeit"}</button>
+          </div>
         </div>
       </div>
     );

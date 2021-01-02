@@ -59,7 +59,25 @@ ol, ul {
   flex-direction: row;
 }
 
+.game-buttons {
+  margin-top: 10px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-button {
+  margin-bottom: 10px;
+  width: 200px;
+  width: 200px;
+  flex-grow: 1;
+  flex-direction: row;
+}
+
 .game-info {
   margin-left: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
