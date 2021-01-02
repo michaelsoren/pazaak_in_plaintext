@@ -7,10 +7,13 @@ ol, ul {
   padding-left: 30px;
 }
 
-.board:after {
+.board {
   clear: both;
   content: "";
   display: table;
+  margin-right: 20px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .table:after {
@@ -53,7 +56,7 @@ ol, ul {
 
 .game-table {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .game-info {

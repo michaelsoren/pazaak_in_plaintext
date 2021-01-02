@@ -3,7 +3,8 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import chunk from 'lodash/chunk'
 
-const boardTiles = 9;
+const numRows = 4;
+const numCols = 4;
 
 function Square(props) {
   return (
@@ -28,10 +29,10 @@ class Board extends React.Component {
       <div>
         <div className="board">
           {
-            chunk(new Array(boardTiles).fill(0), Math.sqrt(boardTiles)).map((item, rowIndex) => {
+            chunk(new Array(numRows * numCols).fill(0), numCols).map((item, rowIndex) => {
               return (
                 <div key={rowIndex} className="row">
-                  {item.map((col, colIndex) => this.renderSquare(Math.sqrt(boardTiles) * rowIndex + colIndex))}
+                  {item.map((col, colIndex) => this.renderSquare(numRows * rowIndex + colIndex))}
                 </div>
               )
             })
@@ -45,18 +46,26 @@ class Board extends React.Component {
 class Table extends React.Component {
   render() {
     return (
-      <div>
-        <div className="player-one-board">
-          <Board
-            squares={this.props.squares}
-            onClick={this.props.onClick}
-          />
+      <div className="game-table">
+        <div className="playerColumn">
+          <div>{"Player One"}</div>
+          <div className="board">
+            <Board
+              squares={this.props.squares}
+              onClick={this.props.onClick}
+            />
+          </div>
+          <div>{"Total: "}</div>
         </div>
-        <div className="player-two-board">
-          <Board
-            squares={this.props.squares}
-            onClick={this.props.onClick}
-          />
+        <div className="playerColumn">
+          <div>{"Player Two"}</div>
+          <div className="board">
+            <Board
+              squares={this.props.squares}
+              onClick={this.props.onClick}
+            />
+          </div>
+          <div>{"Total: "}</div>
         </div>
       </div>
     );
@@ -128,7 +137,7 @@ class Game extends React.Component {
 
     return (
       <div className="game">
-        <div className="game-table">
+        <div>
           <Table
             squares={current.squares}
             onClick={i => this.handleClick(i)}
@@ -140,7 +149,7 @@ class Game extends React.Component {
         </div>
       </div>
     );
-  }e 
+  }
 }
 
 // ========================================
