@@ -85,6 +85,8 @@ class Game extends React.Component {
       playerCardIndexes: [1, 0],
       currentPlayer: 0,
       winner: null,
+      gameHistory: [],
+      setWinner: null,
     };
   }
 
@@ -134,7 +136,8 @@ class Game extends React.Component {
         newIsPlayerStanding[playerIndex] = isOriginalPlayerStanding;
         newIsPlayerStanding[otherPlayerIndex] = true;
 
-        let winner = calculateWinner(newPlayerCards, newIsPlayerStanding);
+        let winner = calculateWinner(newPlayerCards, newIsPlayerStanding, newPlayerCardIndexes);
+        let newSetWinnerIfFinished = calculateSetWinner(this.state.gameHistory, winner);
 
         this.setState({
           playerCards: newPlayerCards,
@@ -142,6 +145,7 @@ class Game extends React.Component {
           isPlayerStanding: newIsPlayerStanding,
           currentPlayer: playerIndex, //todo
           winner: winner,
+          setWinner: newSetWinnerIfFinished,
         });
       } else {
         //other player total is not twenty, so set it to be their turn with their new card
@@ -152,12 +156,15 @@ class Game extends React.Component {
         let newPlayerCardIndexes = this.state.playerCardIndexes.slice();
         newPlayerCardIndexes[otherPlayerIndex] += 1;
 
-        let winner = calculateWinner(newPlayerCards, this.state.isPlayerStanding);
+        let winner = calculateWinner(newPlayerCards, this.state.isPlayerStanding, newPlayerCardIndexes);
+        let newSetWinnerIfFinished = calculateSetWinner(this.state.gameHistory, winner);
+
         this.setState({
           playerCards: newPlayerCards,
           playerCardIndexes: newPlayerCardIndexes,
           currentPlayer: otherPlayerIndex, //todo
           winner: winner,
+          setWinner: newSetWinnerIfFinished,
         });
       }
     } else {
@@ -179,7 +186,8 @@ class Game extends React.Component {
       let newIsPlayerStanding = this.state.isPlayerStanding.slice();
       newIsPlayerStanding[playerIndex] = isOriginalPlayerStanding;
 
-      let winner = calculateWinner(newPlayerCards, newIsPlayerStanding);
+      let winner = calculateWinner(newPlayerCards, newIsPlayerStanding, newPlayerCardIndexes);
+      let newSetWinnerIfFinished = calculateSetWinner(this.state.gameHistory, winner);
 
       this.setState({
         playerCards: newPlayerCards,
@@ -187,6 +195,7 @@ class Game extends React.Component {
         playerCardIndexes: newPlayerCardIndexes,
         currentPlayer: playerIndex,
         winner: winner,
+        setWinner: newSetWinnerIfFinished,
       });
     }
   }
@@ -218,7 +227,8 @@ class Game extends React.Component {
       newIsPlayerStanding[otherPlayerIndex] = isOtherPlayerStanding;
 
 
-      let winner = calculateWinner(newPlayerCards, newIsPlayerStanding);
+      let winner = calculateWinner(newPlayerCards, newIsPlayerStanding, newPlayerCardIndexes);
+      let newSetWinnerIfFinished = calculateSetWinner(this.state.gameHistory, winner);
       
       this.setState({
         playerCards: newPlayerCards,
@@ -226,42 +236,111 @@ class Game extends React.Component {
         newIsPlayerStanding: newIsPlayerStanding,
         currentPlayer: false,
         winner: winner,
+        setWinner: newSetWinnerIfFinished,
       });
     } else {
       //both players are now standing, calculate winners and update the state
       let newIsPlayerStanding = this.state.isPlayerStanding.slice();
       newIsPlayerStanding[playerIndex] = true;
 
-      let winner = calculateWinner(this.state.playerCards, newIsPlayerStanding);
-
+      let winner = calculateWinner(this.state.playerCards, newIsPlayerStanding, this.state.playerCardIndexes);
+      let newSetWinnerIfFinished = calculateSetWinner(this.state.gameHistory, winner);
       this.setState({
         newIsPlayerStanding: newIsPlayerStanding,
         currentPlayer: otherPlayerIndex,
         winner: winner,
+        setWinner: newSetWinnerIfFinished,
       });
     }
   }
 
+  handleNewGame() {
+    let playerOneInitialCards = Array(numRows * numCols).fill(0);
+    let playerTwoInitialCards = Array(numRows * numCols).fill(0);
+    let newCard = getNewCard();
+    let gameWinner = this.state.winner;
+    let newGameHistory = this.state.gameHistory.concat([gameWinner]);
+    playerOneInitialCards[0] = newCard;
+
+    this.setState({
+      playerCards: [playerOneInitialCards, playerTwoInitialCards],
+      isPlayerStanding: [false, false],
+      playerCardIndexes: [1, 0],
+      currentPlayer: 0,
+      winner: null,
+      gameHistory: newGameHistory,
+    });
+  }
+
+  handleNewSet() {
+    let playerOneInitialCards = Array(numRows * numCols).fill(0);
+    let playerTwoInitialCards = Array(numRows * numCols).fill(0);
+    let newCard = getNewCard();
+    playerOneInitialCards[0] = newCard;
+    
+    this.setState({
+      playerCards: [playerOneInitialCards, playerTwoInitialCards],
+      isPlayerStanding: [false, false],
+      playerCardIndexes: [1, 0],
+      currentPlayer: 0,
+      winner: null,
+      gameHistory: [],
+      setWinner: null,
+    });
+  }
+
   render() {
+    let playerOneWinCount = 0;
+    let playerTwoWinCount = 0;
+    if (this.state.gameHistory) {
+      playerOneWinCount = this.state.gameHistory.reduce((a, b) => b === "One" ? a + 1 : a, 0);
+      playerTwoWinCount = this.state.gameHistory.reduce((a, b) => b === "Two" ? a + 1 : a, 0);
+    }
     let status;
     if (this.state.winner) {
-      status = "Winner: " + this.state.winner;
-      return (
-        <div className="game">
-          <div>
-            <Table
-              playerOneCards={this.state.playerCards[0]}
-              playerTwoCards={this.state.playerCards[1]}
-            />
-          </div>
-          <div className="game-info">
-            <div>{status}</div>
-            <div className="game-buttons">
-                <button className="game-button">{"Play Again?"}</button>
+      if (this.state.setWinner) {
+        status = "Overall set winner: " + this.state.winner;
+        playerOneWinCount += this.state.winner === "One" ? 1 : 0;
+        playerTwoWinCount += this.state.winner === "Two" ? 1 : 0;
+        return (
+          <div className="game">
+            <div>
+              <Table
+                playerOneCards={this.state.playerCards[0]}
+                playerTwoCards={this.state.playerCards[1]}
+              />
+            </div>
+            <div className="game-info">
+              <div>{status}</div>
+              <div>{"Player One: " + playerOneWinCount + ", Player Two: " + playerTwoWinCount + ". Best of three."}</div>
+              <div className="game-buttons">
+                  <button className="game-button" onClick={() => this.handleNewSet()}>{"Play Again?"}</button>
+              </div>
             </div>
           </div>
-        </div>
-      );
+        );
+      } else {
+        status = "Game Winner: " + this.state.winner;
+        playerOneWinCount += this.state.winner === "One" ? 1 : 0;
+        playerTwoWinCount += this.state.winner === "Two" ? 1 : 0;
+        return (
+          <div className="game">
+            <div>
+              <Table
+                playerOneCards={this.state.playerCards[0]}
+                playerTwoCards={this.state.playerCards[1]}
+              />
+            </div>
+            <div className="game-info">
+              <div>{"Player One: " + playerOneWinCount + ", Player Two: " + playerTwoWinCount + ". Best of three."}</div>
+              <div>{status}</div>
+              <div className="game-buttons">
+                  <button className="game-button" onClick={() => this.handleNewGame()}>{"Start Next Game?"}</button>
+              </div>
+            </div>
+          </div>
+        );
+      }
     } else {
       status = "Current player: " + (this.state.currentPlayer === 0 ? "One" : "Two");
       return (
@@ -273,6 +352,7 @@ class Game extends React.Component {
             />
           </div>
           <div className="game-info">
+            <div>{"Player One Score: " + playerOneWinCount + ", Player Two Score: " + playerTwoWinCount}</div>
             <div>{status}</div>
             <div className="game-buttons">
                 <button className="game-button" onClick={() => this.handleEndTurn(this.state.currentPlayer)}>{"End Turn"}</button>
@@ -298,11 +378,13 @@ function getOtherPlayerIndex(index) {
   return (index + 1) % 2;
 }
 
-function calculateWinner(playerCards, isPlayerStanding) {
+function calculateWinner(playerCards, isPlayerStanding, playerIndexes) {
   let playerOneScore = playerCards[0].reduce((a, b) => a + b, 0);
   let playerTwoScore = playerCards[1].reduce((a, b) => a + b, 0);
   let isPlayerOneStanding = isPlayerStanding[0];
   let isPlayerTwoStanding = isPlayerStanding[1];
+  let playerOneIndex = playerIndexes[0];
+  let playerTwoIndex = playerIndexes[1];
 
   if (playerOneScore > 20) {
     return "Two";
@@ -310,6 +392,10 @@ function calculateWinner(playerCards, isPlayerStanding) {
     return "One";
   } else if (playerOneScore === 20 && playerTwoScore === 20) {
     return "Tie";
+  } else if (playerOneIndex === 8) {
+    return "Two";
+  } else if (playerTwoIndex === 8) {
+    return "One";
   } else if (isPlayerOneStanding && playerOneScore < playerTwoScore) {
     return "Two";
   } else if (isPlayerTwoStanding && playerOneScore > playerTwoScore) {
@@ -319,4 +405,26 @@ function calculateWinner(playerCards, isPlayerStanding) {
   } else {
     return null;
   }
+}
+
+function calculateSetWinner(gameHistory, winner) {
+  let playerOneWinCount = 0;
+  let playerTwoWinCount = 0;
+  if (gameHistory) {
+    playerOneWinCount = gameHistory.reduce((a, b) => b === "One" ? a + 1 : a, 0);
+    playerTwoWinCount = gameHistory.reduce((a, b) => b === "Two" ? a + 1 : a, 0);
+  }
+  if (winner === "One") {
+    playerOneWinCount += 1;
+  } else if (winner === "Two") {
+    playerTwoWinCount += 1;
+  }
+
+  if (playerOneWinCount === 3) {
+    return "One";
+  } else if (playerTwoWinCount === 3) {
+    return "Two";
+  }
+
+  return null;
 }
